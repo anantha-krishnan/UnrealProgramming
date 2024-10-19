@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "item.generated.h"
 
+class USphereComponent;
+
 UCLASS()
 class SLASH_API Aitem : public AActor
 {
@@ -41,10 +43,19 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RotationParams")
 	double _deg;
 
+	UFUNCTION(BlueprintCallable)
+	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void onSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* ItemMesh;
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess="true"))
 	float _totalTime;
 
 	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* ItemMesh;
+	USphereComponent* SphereComp;
 };

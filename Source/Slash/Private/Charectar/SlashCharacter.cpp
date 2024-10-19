@@ -5,6 +5,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "item/item.h"
+#include "item/Weapons/Weapon.h"
 
 // Sets default values
 ASlashCharacter::ASlashCharacter()
@@ -77,6 +79,25 @@ void ASlashCharacter::LookUp(float value)
 		AddControllerPitchInput(value);
 }
 
+void ASlashCharacter::EKeyPressed()
+{
+	AWeapon* wp = Cast<AWeapon>(_OverlappingItem);
+	if (wp)
+	{
+		wp->Equip(this->GetMesh(), FName(TEXT("RightHandSocket")));
+		_CharectarState = ECharectarState::ECS_EquippedOneHandedWeapon;
+	}
+}
+
+void ASlashCharacter::RKeyPressed()
+{
+	AWeapon* wp = Cast<AWeapon>(_OverlappingItem);
+	if (wp)
+	{
+		_CharectarState = ECharectarState::ECS_EquippedRwoHandedWeapon;
+	}
+}
+
 
 // Called to bind functionality to input
 void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -87,5 +108,7 @@ void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(FName("Turn"), this, &ASlashCharacter::Turn);
 	PlayerInputComponent->BindAxis(FName("LookUp"), this, &ASlashCharacter::LookUp);
 	PlayerInputComponent->BindAction(FName("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction(FName("Equip"), EInputEvent::IE_Pressed, this, &ASlashCharacter::EKeyPressed);
+	//PlayerInputComponent->BindAction(FName("AttackSlide2HW"), EInputEvent::IE_Pressed, this, &ASlashCharacter::RKeyPressed);
 }
 

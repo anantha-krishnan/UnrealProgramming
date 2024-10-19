@@ -3,14 +3,19 @@
 
 #include "item/item.h"
 #include "Slash/DebugMacros.h"
+#include "Components/SphereComponent.h"
+#include "Charectar/SlashCharacter.h"
 
 // Sets default values
 Aitem::Aitem() : _totalTime(0.f),_amp(1.f),_period(1.f)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>("ItemMeshComponent");
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
 	RootComponent = ItemMesh;
+
+	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
+	SphereComp->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
@@ -38,6 +43,8 @@ void Aitem::BeginPlay()
 			//UE_LOG(LogTemp, Warning, TEXT("Item name : %s"), *actorName);
 		}
 	}
+	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &Aitem::OnSphereOverlap);
+	SphereComp->OnComponentEndOverlap.AddDynamic(this, &Aitem::onSphereEndOverlap);
 }
 
 float Aitem::TransformSin(float theta)
@@ -59,6 +66,32 @@ void Aitem::RotateItemActor(FVector unitGlAxisVec, double deg, float deltaTime)
 	//return 0.0f;
 }
 
+void Aitem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	/*
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(1, 30.f, FColor::Green, OtherActor->GetName());
+	*/
+	ASlashCharacter* slashcha = Cast<ASlashCharacter>(OtherActor);
+	if (slashcha)
+	{
+		slashcha->SetOverlappingItem(this);
+	}
+}
+
+void Aitem::onSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	/*
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(1, 30.f, FColor::Red, OtherActor->GetName());
+	*/
+	ASlashCharacter* slashcha = Cast<ASlashCharacter>(OtherActor);
+	if (slashcha)
+	{
+		slashcha->SetOverlappingItem(NULL);
+	}
+}
+
 // Called every frame
 void Aitem::Tick(float DeltaTime)
 {
@@ -67,12 +100,12 @@ void Aitem::Tick(float DeltaTime)
 	//UE_LOG(LogTemp, Warning, TEXT("DeltaTime : %f"), DeltaTime);
 	
 	//float offset = _amp * FMath::Sin(_totalTime * _period)/** DeltaTime*/;
-	FVector loc		= GetActorLocation();
-	FVector actFwd	= GetActorForwardVector();
-	FVector locE	= loc + actFwd * 100.0f;
-	bool persist	= false;
+	//FVector loc		= GetActorLocation();
+	//FVector actFwd	= GetActorForwardVector();
+	//FVector locE	= loc + actFwd * 100.0f;
+	//bool persist	= false;
 	//AddActorWorldOffset(FVector(0, 0, offset));
-	DRAW_SPHERE(loc,persist);
-	DRAW_VECTOR(loc, locE, persist);
+	//DRAW_SPHERE(loc,persist);
+	//DRAW_VECTOR(loc, locE, persist);
 }
 
