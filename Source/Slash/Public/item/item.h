@@ -8,6 +8,12 @@
 
 class USphereComponent;
 
+enum class EItemState :uint8
+{
+	EIS_Hovering UMETA(DisplayName = "UnEquipped"),
+	EIS_Equipped UMETA(DisplayName = "Equipped"),
+};
+
 UCLASS()
 class SLASH_API Aitem : public AActor
 {
@@ -52,10 +58,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* ItemMesh;
 
+	virtual void Equip(USceneComponent* InParent, FName SocketName);
+	UPROPERTY(VisibleAnywhere)
+	USphereComponent* SphereComp;
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess="true"))
 	float _totalTime;
 
-	UPROPERTY(VisibleAnywhere)
-	USphereComponent* SphereComp;
+
+
+	EItemState _ItemState= EItemState::EIS_Hovering;
 };

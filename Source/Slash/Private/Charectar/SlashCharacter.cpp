@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "item/item.h"
 #include "item/Weapons/Weapon.h"
+#include "Animation/AnimInstance.h"
 
 // Sets default values
 ASlashCharacter::ASlashCharacter()
@@ -47,6 +48,7 @@ void ASlashCharacter::Tick(float DeltaTime)
 
 void ASlashCharacter::MoveForward(float value)
 {
+	if (_ActionState== EActionState::EAS_UnOccupied)
 	//check if controller of this pawn is possessed or not. Dont move unpossessed pawns
 	if (Controller && value != 0.f)
 	{
@@ -58,7 +60,8 @@ void ASlashCharacter::MoveForward(float value)
 
 void ASlashCharacter::MoveRight(float value)
 {
-	//check if controller of this pawn is possessed or not. Dont move unpossessed pawns
+	if (_ActionState == EActionState::EAS_UnOccupied)
+		//check if controller of this pawn is possessed or not. Dont move unpossessed pawns
 	if (Controller && value != 0.f)
 	{
 		FRotator t = GetControlRotation();
@@ -82,19 +85,113 @@ void ASlashCharacter::LookUp(float value)
 void ASlashCharacter::EKeyPressed()
 {
 	AWeapon* wp = Cast<AWeapon>(_OverlappingItem);
-	if (wp)
+	if (wp && !_EquippedWeapon)
 	{
 		wp->Equip(this->GetMesh(), FName(TEXT("RightHandSocket")));
 		_CharectarState = ECharectarState::ECS_EquippedOneHandedWeapon;
+		_OverlappingItem = nullptr;
+		_EquippedWeapon = wp;
 	}
+	else
+	{
+		UAnimInstance* _SlashAnimBP = Cast<UAnimInstance>(GetMesh()->GetAnimInstance());
+		if (CanDisarm())
+		{
+			if (_SlashAnimBP && _SlashDisarmMontage)
+			{
+				FName montSec = TEXT("At_Disarm");
+				_SlashAnimBP->Montage_Play(_SlashDisarmMontage);
+				_SlashAnimBP->Montage_JumpToSection(montSec, _SlashDisarmMontage);
+				_ActionState = EActionState::EAS_ArmDisarm;
+			}
+			_CharectarState = ECharectarState::ECS_Unequipped;
+		}
+		else if(CanArm())
+		{
+			if (_SlashAnimBP && _SlashDisarmMontage)
+			{
+				FName montSec = TEXT("At_Arm");
+				_SlashAnimBP->Montage_Play(_SlashDisarmMontage);
+				_SlashAnimBP->Montage_JumpToSection(montSec, _SlashDisarmMontage);
+				_ActionState = EActionState::EAS_ArmDisarm;
+			}
+			_CharectarState = ECharectarState::ECS_EquippedOneHandedWeapon;
+		}
+	}
+
 }
 
 void ASlashCharacter::RKeyPressed()
 {
-	AWeapon* wp = Cast<AWeapon>(_OverlappingItem);
-	if (wp)
+	if (CanAttack())
 	{
-		_CharectarState = ECharectarState::ECS_EquippedRwoHandedWeapon;
+		PlayMontage();
+		_ActionState = EActionState::EAS_Attacking;
+	}
+}
+
+bool ASlashCharacter::CanAttack()
+{
+	return _ActionState == EActionState::EAS_UnOccupied &&
+		_CharectarState != ECharectarState::ECS_Unequipped &&
+		_EquippedWeapon;
+}
+
+bool ASlashCharacter::CanDisarm()
+{
+	return CanAttack();
+	return (_EquippedWeapon && _ActionState == EActionState::EAS_UnOccupied && _CharectarState != ECharectarState::ECS_Unequipped);
+}
+
+bool ASlashCharacter::CanArm()
+{
+	return (_EquippedWeapon && _ActionState == EActionState::EAS_UnOccupied && _CharectarState == ECharectarState::ECS_Unequipped);
+}
+
+void ASlashCharacter::AttackEndNotify()
+{
+	_ActionState = EActionState::EAS_UnOccupied;
+}
+
+void ASlashCharacter::WeaponDisarmSocketNotify()
+{
+	_EquippedWeapon->Equip(this->GetMesh(), FName(TEXT("spine_05Socket")));
+}
+
+void ASlashCharacter::WeaponArmSocketNotify()
+{
+	_EquippedWeapon->Equip(this->GetMesh(), FName(TEXT("RightHandSocket")));
+}
+
+void ASlashCharacter::WeaponArmDisarmNotify()
+{
+	_ActionState = EActionState::EAS_UnOccupied;
+}
+
+void ASlashCharacter::PlayMontage()
+{
+	UAnimInstance* _SlashAnimBP = Cast<UAnimInstance>(GetMesh()->GetAnimInstance());
+	if (_SlashAnimBP && _SlashAttackMontage)
+	{
+		const int32 randSec = FMath::RandRange(0, 1);
+		FName montSec;
+		switch (randSec)
+		{
+		case 0:
+			montSec = TEXT("At_Horizontal");
+			break;
+		case 1:
+			montSec = TEXT("At_360d");
+			break;
+		case 2:
+			montSec = TEXT("At_Slide360d");
+			break;
+		default:
+			montSec = TEXT("At_Horizontal");
+			break;
+		}
+		_SlashAnimBP->Montage_Play(_SlashAttackMontage);
+		_SlashAnimBP->Montage_JumpToSection(montSec, _SlashAttackMontage);
 	}
 }
 
@@ -109,6 +206,6 @@ void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(FName("LookUp"), this, &ASlashCharacter::LookUp);
 	PlayerInputComponent->BindAction(FName("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(FName("Equip"), EInputEvent::IE_Pressed, this, &ASlashCharacter::EKeyPressed);
-	//PlayerInputComponent->BindAction(FName("AttackSlide2HW"), EInputEvent::IE_Pressed, this, &ASlashCharacter::RKeyPressed);
+	PlayerInputComponent->BindAction(FName("Attack"), EInputEvent::IE_Pressed, this, &ASlashCharacter::RKeyPressed);
 }
 

@@ -49,14 +49,16 @@ void Aitem::BeginPlay()
 
 float Aitem::TransformSin(float theta)
 {
-	float offset = _amp * FMath::Sin(theta * _period)/** DeltaTime*/;
-	return offset;
+	if(_ItemState == EItemState::EIS_Hovering)
+		return _amp * FMath::Sin(theta * _period)/** DeltaTime*/;
+	return 0.f;
 }
 
 float Aitem::TransformCos(float theta)
 {
-	float offset = _amp * FMath::Cos(theta * _period)/** DeltaTime*/;
-	return offset;
+	if (_ItemState == EItemState::EIS_Hovering)
+		float offset = _amp * FMath::Cos(theta * _period)/** DeltaTime*/;
+	return 0.f;
 }
 
 void Aitem::RotateItemActor(FVector unitGlAxisVec, double deg, float deltaTime)
@@ -90,6 +92,11 @@ void Aitem::onSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	{
 		slashcha->SetOverlappingItem(NULL);
 	}
+}
+
+void Aitem::Equip(USceneComponent* InParent, FName SocketName)
+{
+	_ItemState = EItemState::EIS_Equipped;
 }
 
 // Called every frame

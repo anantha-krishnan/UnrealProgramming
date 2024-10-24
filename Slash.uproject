@@ -24,6 +24,10 @@
 		{
 			"Name": "Takes",
 			"Enabled": true
+		},
+		{
+			"Name": "Metasound",
+			"Enabled": true
 		}
 	]
 }

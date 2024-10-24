@@ -10,7 +10,9 @@
 class USpringArmComponent;
 class UCameraComponent;
 class Aitem;
-
+class UAnimInstance;
+class UAnimMontage;
+class AWeapon;
 
 UCLASS()
 class SLASH_API ASlashCharacter : public ACharacter
@@ -40,8 +42,24 @@ protected:
 	void EKeyPressed();
 	void RKeyPressed();
 
+	bool CanAttack();
+
+	bool CanDisarm();
+
+	bool CanArm();
+
+	UFUNCTION(BlueprintCallable)
+	void AttackEndNotify();
+	UFUNCTION(BlueprintCallable)
+	void WeaponDisarmSocketNotify();
+	UFUNCTION(BlueprintCallable)
+	void WeaponArmSocketNotify();
+	UFUNCTION(BlueprintCallable)
+	void WeaponArmDisarmNotify();
+
 private:
 	ECharectarState _CharectarState = ECharectarState::ECS_Unequipped;
+	EActionState _ActionState = EActionState::EAS_UnOccupied;	
 
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* _SpringArm;
@@ -49,8 +67,17 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* _Camera;
 
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY(VisibleInstanceOnly, Category = "Weapon")
 	Aitem* _OverlappingItem;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Montage")
+	UAnimMontage* _SlashAttackMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Montage")
+	UAnimMontage* _SlashDisarmMontage;
+
+	AWeapon* _EquippedWeapon;
+	void PlayMontage();
 
 public:
 	FORCEINLINE void SetOverlappingItem(Aitem* item) { _OverlappingItem = item; }
