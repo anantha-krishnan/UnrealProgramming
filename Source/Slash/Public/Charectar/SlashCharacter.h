@@ -56,7 +56,8 @@ protected:
 	void WeaponArmSocketNotify();
 	UFUNCTION(BlueprintCallable)
 	void WeaponArmDisarmNotify();
-
+	UFUNCTION(BlueprintCallable)
+	void WeaponTraceStEnd(ECollisionEnabled::Type Trace);
 private:
 	ECharectarState _CharectarState = ECharectarState::ECS_Unequipped;
 	EActionState _ActionState = EActionState::EAS_UnOccupied;	

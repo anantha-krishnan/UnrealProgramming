@@ -14,7 +14,7 @@ AWeapon::AWeapon()
     _BoxForTraceHit = CreateDefaultSubobject<UBoxComponent>(TEXT("SwordHitTrace"));
     _BoxForTraceHit->SetupAttachment(GetRootComponent());
     
-    _BoxForTraceHit->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    _BoxForTraceHit->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     _BoxForTraceHit->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
     _BoxForTraceHit->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
     
@@ -30,6 +30,11 @@ void AWeapon::BeginPlay()
 {
     Super::BeginPlay();
     _BoxForTraceHit->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnBoxOverlap);
+}
+void AWeapon::SetWeaponCollision(ECollisionEnabled::Type CollisionType)
+{
+    _BoxForTraceHit->SetCollisionEnabled(CollisionType);
+
 }
 void AWeapon::Equip(USceneComponent* InParent, FName SocketName)
 {
@@ -87,3 +92,5 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
         true);
     
 }
+
+

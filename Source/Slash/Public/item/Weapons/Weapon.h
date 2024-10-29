@@ -23,6 +23,7 @@ public:
 	AWeapon();
 	void Equip(USceneComponent* InParent, FName SocketName) override;
 	void BeginPlay() override;
+	void SetWeaponCollision(ECollisionEnabled::Type CollisionType);
 
 protected:
 	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
@@ -44,5 +45,6 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
+
 
 };

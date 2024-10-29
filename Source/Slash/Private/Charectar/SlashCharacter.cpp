@@ -209,3 +209,8 @@ void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAction(FName("Attack"), EInputEvent::IE_Pressed, this, &ASlashCharacter::RKeyPressed);
 }
 
+void ASlashCharacter::WeaponTraceStEnd(ECollisionEnabled::Type Trace)
+{
+	if (_EquippedWeapon)
+		_EquippedWeapon->SetWeaponCollision(Trace);
+}
