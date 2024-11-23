@@ -213,4 +213,5 @@ void ASlashCharacter::WeaponTraceStEnd(ECollisionEnabled::Type Trace)
 {
 	if (_EquippedWeapon)
 		_EquippedWeapon->SetWeaponCollision(Trace);
+	_EquippedWeapon->clearHitList();
 }

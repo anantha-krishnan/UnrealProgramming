@@ -5,17 +5,25 @@
 #include "Slash/DebugMacros.h"
 #include "Components/SphereComponent.h"
 #include "Charectar/SlashCharacter.h"
+#include "NiagaraComponent.h"
 
 // Sets default values
-Aitem::Aitem() : _totalTime(0.f),_amp(1.f),_period(1.f)
+Aitem::Aitem() : _totalTime(0.f),_amp(2.f),_period(5.f),_unitGlAxisVec(0,0,1)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
 	RootComponent = ItemMesh;
 
+	ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	SphereComp->SetupAttachment(GetRootComponent());
+
+	_EmbersEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Embers"));
+	_EmbersEffect->SetupAttachment(GetRootComponent());
+
 }
 
 // Called when the game starts or when spawned
@@ -64,7 +72,6 @@ float Aitem::TransformCos(float theta)
 void Aitem::RotateItemActor(FVector unitGlAxisVec, double deg, float deltaTime)
 {	
 
-	AddActorWorldRotation(FQuat(unitGlAxisVec, deg* deltaTime / 180.0 * 22.0 / 7.0));
 	//return 0.0f;
 }
 
@@ -104,6 +111,7 @@ void Aitem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	_totalTime += DeltaTime;
+	//AddActorWorldRotation(FQuat(_unitGlAxisVec, _deg * _totalTime / 180.0 * 22.0 / 7.0));
 	//UE_LOG(LogTemp, Warning, TEXT("DeltaTime : %f"), DeltaTime);
 	
 	//float offset = _amp * FMath::Sin(_totalTime * _period)/** DeltaTime*/;
@@ -111,7 +119,8 @@ void Aitem::Tick(float DeltaTime)
 	//FVector actFwd	= GetActorForwardVector();
 	//FVector locE	= loc + actFwd * 100.0f;
 	//bool persist	= false;
-	//AddActorWorldOffset(FVector(0, 0, offset));
+	double offset = TransformSin(_totalTime);
+	AddActorWorldOffset(FVector(0, 0, offset));
 	//DRAW_SPHERE(loc,persist);
 	//DRAW_VECTOR(loc, locE, persist);
 }

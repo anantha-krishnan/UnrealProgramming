@@ -7,6 +7,8 @@
 #include "Components/SceneComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Interfaces/HitInterface.h"
+#include "NiagaraComponent.h"
 
 AWeapon::AWeapon()
 {
@@ -45,6 +47,8 @@ void AWeapon::Equip(USceneComponent* InParent, FName SocketName)
         SphereComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     if (_WeaponEquipSound)
         UGameplayStatics::PlaySoundAtLocation(this, _WeaponEquipSound, GetActorLocation());
+    if (_EmbersEffect)
+        _EmbersEffect->Deactivate();
 }
 
 
@@ -78,6 +82,9 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
     TArray<AActor*>IgnoreList;
     FHitResult hit;
     IgnoreList.Add(this);
+    for (AActor* a : _HitList)
+        IgnoreList.AddUnique(a);
+
     UKismetSystemLibrary::BoxTraceSingle(
         this, 
         traceBoxS, 
@@ -90,7 +97,11 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
         EDrawDebugTrace::ForDuration, 
         hit, 
         true);
-    
+    IHitInterface *hitClass = Cast<IHitInterface>(hit.GetActor());
+    if (hitClass)
+        hitClass->Execute_GetHit(hit.GetActor(),hit.ImpactPoint);
+    IgnoreList.AddUnique(hit.GetActor());
+    CreateField(hit.ImpactPoint);
 }
 
 

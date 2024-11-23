@@ -7,6 +7,7 @@
 #include "item.generated.h"
 
 class USphereComponent;
+class UNiagaraComponent;
 
 enum class EItemState :uint8
 {
@@ -61,9 +62,13 @@ protected:
 	virtual void Equip(USceneComponent* InParent, FName SocketName);
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* SphereComp;
-private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess="true"))
 	float _totalTime;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraComponent* _EmbersEffect;
+
+private:
 
 
 

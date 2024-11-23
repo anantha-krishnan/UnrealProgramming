@@ -24,12 +24,15 @@ public:
 	void Equip(USceneComponent* InParent, FName SocketName) override;
 	void BeginPlay() override;
 	void SetWeaponCollision(ECollisionEnabled::Type CollisionType);
+	FORCEINLINE void clearHitList() { _HitList.Empty(); };
 
 protected:
 	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 
 	virtual void onSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
 	
+	UFUNCTION(BlueprintImplementableEvent)
+	void CreateField(const FVector& loc);
 private:
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	USoundBase* _WeaponEquipSound;
@@ -45,6 +48,7 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
+	TArray<AActor*> _HitList;
 
 
 };
