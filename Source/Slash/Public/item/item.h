@@ -59,7 +59,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* ItemMesh;
 
-	virtual void Equip(USceneComponent* InParent, FName SocketName);
+	virtual void Equip(USceneComponent* InParent, FName SocketName, AActor* newowner, APawn* newInstigator);
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* SphereComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess="true"))

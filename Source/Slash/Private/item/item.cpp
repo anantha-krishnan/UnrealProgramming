@@ -101,7 +101,7 @@ void Aitem::onSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	}
 }
 
-void Aitem::Equip(USceneComponent* InParent, FName SocketName)
+void Aitem::Equip(USceneComponent* InParent, FName SocketName, AActor* newowner, APawn* newInstigator)
 {
 	_ItemState = EItemState::EIS_Equipped;
 }

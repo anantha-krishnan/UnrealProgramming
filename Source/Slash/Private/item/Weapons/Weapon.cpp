@@ -10,7 +10,7 @@
 #include "Interfaces/HitInterface.h"
 #include "NiagaraComponent.h"
 
-AWeapon::AWeapon()
+AWeapon::AWeapon():_Damage(20.f)
 {
     
     _BoxForTraceHit = CreateDefaultSubobject<UBoxComponent>(TEXT("SwordHitTrace"));
@@ -38,11 +38,13 @@ void AWeapon::SetWeaponCollision(ECollisionEnabled::Type CollisionType)
     _BoxForTraceHit->SetCollisionEnabled(CollisionType);
 
 }
-void AWeapon::Equip(USceneComponent* InParent, FName SocketName)
+void AWeapon::Equip(USceneComponent* InParent, FName SocketName, AActor* newowner, APawn* newInstigator)
 {
+    SetOwner(newowner);
+    SetInstigator(newInstigator);
     FAttachmentTransformRules attRules(EAttachmentRule::SnapToTarget, true);
     ItemMesh->AttachToComponent(InParent, attRules, SocketName);
-    Super::Equip(InParent, SocketName);
+    Super::Equip(InParent, SocketName, newowner,newInstigator);
     if (SphereComp)
         SphereComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     if (_WeaponEquipSound)
@@ -97,11 +99,21 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
         EDrawDebugTrace::ForDuration, 
         hit, 
         true);
-    IHitInterface *hitClass = Cast<IHitInterface>(hit.GetActor());
-    if (hitClass)
-        hitClass->Execute_GetHit(hit.GetActor(),hit.ImpactPoint);
-    IgnoreList.AddUnique(hit.GetActor());
-    CreateField(hit.ImpactPoint);
+    if (hit.GetActor())
+    {
+        IHitInterface* hitClass = Cast<IHitInterface>(hit.GetActor());
+        if (hitClass)
+            hitClass->Execute_GetHit(hit.GetActor(), hit.ImpactPoint);
+        IgnoreList.AddUnique(hit.GetActor());
+        CreateField(hit.ImpactPoint);
+        UGameplayStatics::ApplyDamage(
+            hit.GetActor(),
+            _Damage,
+            GetInstigator()->GetController(),
+            this,
+            UDamageType::StaticClass()
+        );
+    }
 }
 
 

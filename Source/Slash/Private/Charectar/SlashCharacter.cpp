@@ -87,7 +87,7 @@ void ASlashCharacter::EKeyPressed()
 	AWeapon* wp = Cast<AWeapon>(_OverlappingItem);
 	if (wp && !_EquippedWeapon)
 	{
-		wp->Equip(this->GetMesh(), FName(TEXT("RightHandSocket")));
+		wp->Equip(this->GetMesh(), FName(TEXT("RightHandSocket")),this,this);
 		_CharectarState = ECharectarState::ECS_EquippedOneHandedWeapon;
 		_OverlappingItem = nullptr;
 		_EquippedWeapon = wp;
@@ -155,12 +155,12 @@ void ASlashCharacter::AttackEndNotify()
 
 void ASlashCharacter::WeaponDisarmSocketNotify()
 {
-	_EquippedWeapon->Equip(this->GetMesh(), FName(TEXT("spine_05Socket")));
+	_EquippedWeapon->Equip(this->GetMesh(), FName(TEXT("spine_05Socket")),this,this);
 }
 
 void ASlashCharacter::WeaponArmSocketNotify()
 {
-	_EquippedWeapon->Equip(this->GetMesh(), FName(TEXT("RightHandSocket")));
+	_EquippedWeapon->Equip(this->GetMesh(), FName(TEXT("RightHandSocket")),this,this);
 }
 
 void ASlashCharacter::WeaponArmDisarmNotify()

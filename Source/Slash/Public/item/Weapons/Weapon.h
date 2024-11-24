@@ -21,7 +21,7 @@ class SLASH_API AWeapon : public Aitem
 	
 public:
 	AWeapon();
-	void Equip(USceneComponent* InParent, FName SocketName) override;
+	void Equip(USceneComponent* InParent, FName SocketName, AActor* newowner, APawn* newInstigator) override;
 	void BeginPlay() override;
 	void SetWeaponCollision(ECollisionEnabled::Type CollisionType);
 	FORCEINLINE void clearHitList() { _HitList.Empty(); };
@@ -50,5 +50,6 @@ private:
 	
 	TArray<AActor*> _HitList;
 
+	float _Damage;
 
 };

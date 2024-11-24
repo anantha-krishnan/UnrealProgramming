@@ -7,6 +7,8 @@
 #include "../../DebugMacros.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "SlashComponents/AttributeComponent.h"
+#include "HUD/HealthWidgetComponent.h"
 
 // Sets default values
 AEnemy::AEnemy()
@@ -19,13 +21,18 @@ AEnemy::AEnemy()
 	enemyMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	enemyMesh->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	_Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
+
+	_HealthWidget = CreateDefaultSubobject<UHealthWidgetComponent>(TEXT("HealthBar"));
+	_HealthWidget->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	updateHealthWidget(1.f);
 }
 
 // Called every frame
@@ -63,11 +70,25 @@ void AEnemy::GetHit_Implementation(const FVector& hitloc)
 
 	UKismetSystemLibrary::DrawDebugArrow(this, enemyloc, enemyloc + enemyfwd * 60.f, 5.f, FColor::Red, 5.f);
 	UKismetSystemLibrary::DrawDebugArrow(this, enemyloc, enemyloc + hitvec*60.f, 5.f, FColor::Green, 5.f);
-	PlayMontage(montsec);
+	if (_Attributes)
+	{
+		if (_Attributes->IsAlive())
+			PlayMontage(montsec);
+		else
+			PlayDieMontage();
+	}
 	if (_EnemyHitSound)
 		UGameplayStatics::PlaySoundAtLocation(this, _EnemyHitSound, hitloc);
 	if (_EnemyHitBlood)
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), _EnemyHitBlood, hitloc);
+
+}
+
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	reduceHealth(DamageAmount);
+	
+	return 0.0f;
 }
 
 void AEnemy::PlayMontage(FName montSec)
@@ -79,3 +100,62 @@ void AEnemy::PlayMontage(FName montSec)
 		_EnemyAnimBP->Montage_JumpToSection(montSec, _EnemyHitMontage);
 	}
 }
+
+void AEnemy::PlayDieMontage()
+{
+	UAnimInstance* _EnemyAnimBP = Cast<UAnimInstance>(GetMesh()->GetAnimInstance());
+	if (_EnemyAnimBP && _EnemyDeathMontage)
+	{
+		const int32 randSec = FMath::RandRange(0, 5);
+		FName montSec;
+		switch (randSec)
+		{
+		case 0:
+			montSec = TEXT("Death1");
+			_Pose = EDeathPose::EDP_Dead1;
+			break;
+		case 1:
+			montSec = TEXT("Death2");
+			_Pose = EDeathPose::EDP_Dead2;
+			break;
+		case 2:
+			montSec = TEXT("Death3");
+			_Pose = EDeathPose::EDP_Dead3;
+			break;
+		case 3:
+			montSec = TEXT("Death4");
+			_Pose = EDeathPose::EDP_Dead4;
+			break;
+		case 4:
+			montSec = TEXT("Death5");
+			_Pose = EDeathPose::EDP_Dead5;
+			break;
+		case 5:
+			montSec = TEXT("Death6");
+			_Pose = EDeathPose::EDP_Dead6;
+			break;
+		default:
+			montSec = TEXT("Death1");
+			_Pose = EDeathPose::EDP_Dead1;
+			break;
+		}
+		_EnemyAnimBP->Montage_Play(_EnemyDeathMontage);
+		_EnemyAnimBP->Montage_JumpToSection(montSec, _EnemyDeathMontage);
+	}
+}
+
+void AEnemy::reduceHealth(float danage)
+{
+	if (_Attributes)
+	{
+		_Attributes->reduceCurrHealth(danage);
+		updateHealthWidget(_Attributes->getHealthPercent());
+	}
+	
+}
+void AEnemy::updateHealthWidget(float per)
+{
+	if (_HealthWidget)
+		_HealthWidget->SetHealthPercent(per);
+}
+
