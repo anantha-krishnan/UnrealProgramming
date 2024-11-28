@@ -29,3 +29,19 @@ enum class EDeathPose :uint8
 	EDP_Dead6 UMETA(DisplayName = "Dead6"),
 };
 
+
+UENUM(BlueprintType)
+enum class EEnemyState :uint8
+{
+	EES_Patrolling UMETA(DisplayName = "Patrolling"),
+	EES_Chasing UMETA(DisplayName = "Chasing"),
+	EES_Attacking UMETA(DisplayName = "Attacking"),
+};
+
+UENUM(BlueprintType)
+enum class ECharectars :uint8
+{
+	EC_SlashCharectar UMETA(DisplayName = "SlashCharectar"),
+	EC_Enemy UMETA(DisplayName = "Enemy"),
+	EC_Treasure UMETA(DisplayName = "Treasure"),
+};

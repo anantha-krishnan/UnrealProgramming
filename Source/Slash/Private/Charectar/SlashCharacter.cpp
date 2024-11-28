@@ -29,6 +29,7 @@ ASlashCharacter::ASlashCharacter()
 	_Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	_Camera->SetupAttachment(_SpringArm);
 
+	Tags.Add(FName(UEnum::GetDisplayValueAsText(ECharectars::EC_SlashCharectar).ToString()));
 
 }
 
