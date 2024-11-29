@@ -172,7 +172,7 @@ void ASlashCharacter::WeaponArmDisarmNotify()
 void ASlashCharacter::PlayMontage()
 {
 	UAnimInstance* _SlashAnimBP = Cast<UAnimInstance>(GetMesh()->GetAnimInstance());
-	if (_SlashAnimBP && _SlashAttackMontage)
+	if (_SlashAnimBP && _AttackMontage)
 	{
 		const int32 randSec = FMath::RandRange(0, 1);
 		FName montSec;
@@ -191,8 +191,8 @@ void ASlashCharacter::PlayMontage()
 			montSec = TEXT("At_Horizontal");
 			break;
 		}
-		_SlashAnimBP->Montage_Play(_SlashAttackMontage);
-		_SlashAnimBP->Montage_JumpToSection(montSec, _SlashAttackMontage);
+		_SlashAnimBP->Montage_Play(_AttackMontage);
+		_SlashAnimBP->Montage_JumpToSection(montSec, _AttackMontage);
 	}
 }
 
@@ -208,11 +208,4 @@ void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAction(FName("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(FName("Equip"), EInputEvent::IE_Pressed, this, &ASlashCharacter::EKeyPressed);
 	PlayerInputComponent->BindAction(FName("Attack"), EInputEvent::IE_Pressed, this, &ASlashCharacter::RKeyPressed);
-}
-
-void ASlashCharacter::WeaponTraceStEnd(ECollisionEnabled::Type Trace)
-{
-	if (_EquippedWeapon)
-		_EquippedWeapon->SetWeaponCollision(Trace);
-	_EquippedWeapon->clearHitList();
 }

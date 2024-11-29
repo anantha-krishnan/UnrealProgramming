@@ -25,8 +25,6 @@ AEnemy::AEnemy()
 	enemyMesh->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
-	_Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
-
 	_HealthWidget = CreateDefaultSubobject<UHealthWidgetComponent>(TEXT("HealthBar"));
 	_HealthWidget->SetupAttachment(GetRootComponent());
 
@@ -192,6 +190,8 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AEnemy::GetHit_Implementation(const FVector& hitloc)
 {
+	if (_HealthWidget)
+		_HealthWidget->SetVisibility(true);
 	const FVector enemyfwd =  GetActorForwardVector().GetSafeNormal2D();
 	const FVector enemyloc = GetActorLocation();
 	const FVector hitvec = (hitloc - enemyloc).GetSafeNormal2D();
@@ -209,19 +209,19 @@ void AEnemy::GetHit_Implementation(const FVector& hitloc)
 	else if (theta > -45.f && theta < 135.f)
 		montsec = "FromLeft";
 
-	UKismetSystemLibrary::DrawDebugArrow(this, enemyloc, enemyloc + enemyfwd * 60.f, 5.f, FColor::Red, 5.f);
-	UKismetSystemLibrary::DrawDebugArrow(this, enemyloc, enemyloc + hitvec*60.f, 5.f, FColor::Green, 5.f);
+	//UKismetSystemLibrary::DrawDebugArrow(this, enemyloc, enemyloc + enemyfwd * 60.f, 5.f, FColor::Red, 5.f);
+	//UKismetSystemLibrary::DrawDebugArrow(this, enemyloc, enemyloc + hitvec*60.f, 5.f, FColor::Green, 5.f);
 	if (_Attributes)
 	{
 		if (_Attributes->IsAlive())
-			PlayMontage(montsec);
+			PlayHitReactMontage(montsec);
 		else
 			PlayDieMontage();
 	}
-	if (_EnemyHitSound)
-		UGameplayStatics::PlaySoundAtLocation(this, _EnemyHitSound, hitloc);
-	if (_EnemyHitBlood)
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), _EnemyHitBlood, hitloc);
+	if (_HitSound)
+		UGameplayStatics::PlaySoundAtLocation(this, _HitSound, hitloc);
+	if (_HitBlood)
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), _HitBlood, hitloc);
 
 }
 
@@ -229,26 +229,19 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 {
 	reduceHealth(DamageAmount);
 	_CombatTarget = EventInstigator->GetPawn();
-	if (_HealthWidget)
-		_HealthWidget->SetVisibility(true);
-
+	
+	_CurrentState = EEnemyState::EES_Chasing;
+	GetWorldTimerManager().ClearTimer(_PatrolDelayTimerHandle);
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	MoveToTarget(_CombatTarget);
 	return DamageAmount;
 }
 
-void AEnemy::PlayMontage(FName montSec)
-{
-	UAnimInstance* _EnemyAnimBP = Cast<UAnimInstance>(GetMesh()->GetAnimInstance());
-	if (_EnemyAnimBP && _EnemyHitMontage)
-	{
-		_EnemyAnimBP->Montage_Play(_EnemyHitMontage);
-		_EnemyAnimBP->Montage_JumpToSection(montSec, _EnemyHitMontage);
-	}
-}
 
 void AEnemy::PlayDieMontage()
 {
 	UAnimInstance* _EnemyAnimBP = Cast<UAnimInstance>(GetMesh()->GetAnimInstance());
-	if (_EnemyAnimBP && _EnemyDeathMontage)
+	if (_EnemyAnimBP && _DeathMontage)
 	{
 		const int32 randSec = FMath::RandRange(0, 5);
 		FName montSec;
@@ -283,8 +276,8 @@ void AEnemy::PlayDieMontage()
 			_Pose = EDeathPose::EDP_Dead1;
 			break;
 		}
-		_EnemyAnimBP->Montage_Play(_EnemyDeathMontage);
-		_EnemyAnimBP->Montage_JumpToSection(montSec, _EnemyDeathMontage);
+		_EnemyAnimBP->Montage_Play(_DeathMontage);
+		_EnemyAnimBP->Montage_JumpToSection(montSec, _DeathMontage);
 	}
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetLifeSpan(3.f);

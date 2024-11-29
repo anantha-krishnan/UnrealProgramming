@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "CharectarTypes.h"
+#include "../Charectar/BaseCharacter.h"
 #include "SlashCharacter.generated.h"
 
 class USpringArmComponent;
@@ -15,7 +16,7 @@ class UAnimMontage;
 class AWeapon;
 
 UCLASS()
-class SLASH_API ASlashCharacter : public ACharacter
+class SLASH_API ASlashCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -40,24 +41,26 @@ protected:
 
 	void LookUp(float value);
 	void EKeyPressed();
-	void RKeyPressed();
+	virtual void RKeyPressed() override;
+	virtual void PlayMontage() override;
 
-	bool CanAttack();
+	virtual bool CanAttack() override;
 
 	bool CanDisarm();
 
 	bool CanArm();
 
-	UFUNCTION(BlueprintCallable)
-	void AttackEndNotify();
+	virtual void AttackEndNotify() override;
+
 	UFUNCTION(BlueprintCallable)
 	void WeaponDisarmSocketNotify();
+
 	UFUNCTION(BlueprintCallable)
 	void WeaponArmSocketNotify();
+
 	UFUNCTION(BlueprintCallable)
 	void WeaponArmDisarmNotify();
-	UFUNCTION(BlueprintCallable)
-	void WeaponTraceStEnd(ECollisionEnabled::Type Trace);
+
 private:
 	ECharectarState _CharectarState = ECharectarState::ECS_Unequipped;
 	EActionState _ActionState = EActionState::EAS_UnOccupied;	
@@ -71,14 +74,11 @@ private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Weapon")
 	Aitem* _OverlappingItem;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Montage")
-	UAnimMontage* _SlashAttackMontage;
+
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montage")
 	UAnimMontage* _SlashDisarmMontage;
 
-	AWeapon* _EquippedWeapon;
-	void PlayMontage();
 
 public:
 	FORCEINLINE void SetOverlappingItem(Aitem* item) { _OverlappingItem = item; }
