@@ -25,14 +25,19 @@ public:
 
 	void CheckCombatTarget();
 
+	void SetChasingTrue();
+
+	void SetPatrolTrue();
+
 	void EnemyPatrolMovement();
 
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetHit_Implementation(const FVector& hitloc) override;
+	void SetHealthWidgetVisibility(bool status);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
+	virtual void Destroyed() override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -40,7 +45,13 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose _Pose = EDeathPose::EDP_Alive;
-private:	
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AWeapon> _WeaponClass;
+	virtual void AttackEndNotify() override;
+	virtual bool CanAttack() override;
+	bool CanChase();
+private:
 
 	UPROPERTY(VisibleAnywhere, Category = "HitEffects")
 	UHealthWidgetComponent* _HealthWidget;
@@ -76,6 +87,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "AI Navigation")
 	UPawnSensingComponent* _PawnSensing;
 
+	UPROPERTY(VisibleAnywhere, Category = "AI Navigation")
 	EEnemyState _CurrentState;
 
 

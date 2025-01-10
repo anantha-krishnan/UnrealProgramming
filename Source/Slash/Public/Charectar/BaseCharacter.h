@@ -31,12 +31,18 @@ protected:
 	AWeapon* _EquippedWeapon;
 	virtual void RKeyPressed();
 	virtual void PlayMontage();
+	virtual void PlayMontage(UAnimInstance* anim, UAnimMontage* animMont, FName monSec);
+	virtual void PlayAttackMontage();
+	virtual void PlayDieMontage();
+	void GetHit_Implementation(const FVector& hitloc);
+	void DirectionalHit(const FVector& ImpactPoint);
+	void GetRandMontSec(TArray<FName>& montArrayNames, int32& montSec, FName& montSecName);
+	
 	virtual bool CanAttack();
 	UFUNCTION(BlueprintCallable)
 	virtual void AttackEndNotify();
 
 
-	virtual void PlayDieMontage();
 	void PlayHitReactMontage(FName montSec);
 
 	UPROPERTY(VisibleAnywhere, Category = "HitEffects")
@@ -51,11 +57,19 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Montage")
 	UAnimMontage* _AttackMontage;
 
-	UPROPERTY(EditDefaultsOnly, Category = "HitEffects")
+	UPROPERTY(EditDefaultsOnly, Category = "Montage")
 	UAnimMontage* _HitMontage;
 
-	UPROPERTY(EditDefaultsOnly, Category = "HitEffects")
+	UPROPERTY(EditDefaultsOnly, Category = "Montage")
 	UAnimMontage* _DeathMontage;
+	
+	UPROPERTY(EditAnywhere, Category = "Montage")
+	TArray<FName> _AttackMontageNames;
+	UPROPERTY(EditAnywhere, Category = "Montage")
+	TArray<FName> _DeathMontageNames;
+
+	virtual void PlayHitSound(const FVector& hitloc);
+	virtual void SpawnHitParticles(const FVector& hitloc);
 
 public:
 	// Called every frame

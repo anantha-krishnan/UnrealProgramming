@@ -31,6 +31,7 @@ ASlashCharacter::ASlashCharacter()
 
 	Tags.Add(FName(UEnum::GetDisplayValueAsText(ECharectars::EC_SlashCharectar).ToString()));
 
+
 }
 
 // Called when the game starts or when spawned
@@ -126,7 +127,7 @@ void ASlashCharacter::RKeyPressed()
 {
 	if (CanAttack())
 	{
-		PlayMontage();
+		PlayAttackMontage();
 		_ActionState = EActionState::EAS_Attacking;
 	}
 }
@@ -154,6 +155,13 @@ void ASlashCharacter::AttackEndNotify()
 	_ActionState = EActionState::EAS_UnOccupied;
 }
 
+void ASlashCharacter::GetHit_Implementation(const FVector& hitloc)
+{
+	Super::GetHit_Implementation(hitloc);
+	PlayHitSound(hitloc);
+	SpawnHitParticles(hitloc);
+}
+
 void ASlashCharacter::WeaponDisarmSocketNotify()
 {
 	_EquippedWeapon->Equip(this->GetMesh(), FName(TEXT("spine_05Socket")),this,this);
@@ -168,34 +176,6 @@ void ASlashCharacter::WeaponArmDisarmNotify()
 {
 	_ActionState = EActionState::EAS_UnOccupied;
 }
-
-void ASlashCharacter::PlayMontage()
-{
-	UAnimInstance* _SlashAnimBP = Cast<UAnimInstance>(GetMesh()->GetAnimInstance());
-	if (_SlashAnimBP && _AttackMontage)
-	{
-		const int32 randSec = FMath::RandRange(0, 1);
-		FName montSec;
-		switch (randSec)
-		{
-		case 0:
-			montSec = TEXT("At_Horizontal");
-			break;
-		case 1:
-			montSec = TEXT("At_360d");
-			break;
-		case 2:
-			montSec = TEXT("At_Slide360d");
-			break;
-		default:
-			montSec = TEXT("At_Horizontal");
-			break;
-		}
-		_SlashAnimBP->Montage_Play(_AttackMontage);
-		_SlashAnimBP->Montage_JumpToSection(montSec, _AttackMontage);
-	}
-}
-
 
 // Called to bind functionality to input
 void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

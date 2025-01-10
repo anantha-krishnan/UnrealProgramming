@@ -96,9 +96,15 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
         ETraceTypeQuery::TraceTypeQuery1, 
         false, 
         IgnoreList, 
-        EDrawDebugTrace::ForDuration, 
+        EDrawDebugTrace::None, 
         hit, 
         true);
+
+    if (GetOwner()->ActorHasTag(FName(UEnum::GetDisplayValueAsText(ECharectars::EC_Enemy).ToString()))
+        && hit.GetActor()->ActorHasTag(FName(UEnum::GetDisplayValueAsText(ECharectars::EC_Enemy).ToString()))
+        )
+        return;
+    //GetInstigator()->GetOwner()
     if (hit.GetActor())
     {
         IHitInterface* hitClass = Cast<IHitInterface>(hit.GetActor());

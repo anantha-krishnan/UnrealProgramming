@@ -42,7 +42,6 @@ protected:
 	void LookUp(float value);
 	void EKeyPressed();
 	virtual void RKeyPressed() override;
-	virtual void PlayMontage() override;
 
 	virtual bool CanAttack() override;
 
@@ -52,6 +51,8 @@ protected:
 
 	virtual void AttackEndNotify() override;
 
+	virtual void GetHit_Implementation(const FVector& hitloc) override;
+	
 	UFUNCTION(BlueprintCallable)
 	void WeaponDisarmSocketNotify();
 
