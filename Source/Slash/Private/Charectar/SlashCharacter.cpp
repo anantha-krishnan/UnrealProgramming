@@ -8,6 +8,9 @@
 #include "item/item.h"
 #include "item/Weapons/Weapon.h"
 #include "Animation/AnimInstance.h"
+#include "HUD/SlashHUD.h"
+#include "HUD/SlashOverlay.h"
+#include "SlashComponents/AttributeComponent.h"
 
 // Sets default values
 ASlashCharacter::ASlashCharacter()
@@ -29,7 +32,6 @@ ASlashCharacter::ASlashCharacter()
 	_Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	_Camera->SetupAttachment(_SpringArm);
 
-	Tags.Add(FName(UEnum::GetDisplayValueAsText(ECharectars::EC_SlashCharectar).ToString()));
 
 
 }
@@ -38,7 +40,30 @@ ASlashCharacter::ASlashCharacter()
 void ASlashCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	Tags.Add(FName(UEnum::GetDisplayValueAsText(ECharectars::EC_SlashCharectar).ToString()));
+
+	InitialiseSlashOverlay();
+
+}
+
+void ASlashCharacter::InitialiseSlashOverlay()
+{
+	APlayerController* pc = Cast<APlayerController>(GetController());
+	if (pc)
+	{
+		ASlashHUD* sh = Cast<ASlashHUD>(pc->GetHUD());
+		if (sh)
+		{
+			shov = sh->GetSlashOverlay();
+			if (shov && _Attributes)
+			{
+				shov->SetHealthBarPercent(_Attributes->getHealthPercent());
+				shov->SetStaminaBarPercent(1.f);
+				shov->SetGold(0);
+				shov->SetSouls(0);
+			}
+		}
+	}
 }
 
 // Called every frame
@@ -188,4 +213,12 @@ void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAction(FName("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(FName("Equip"), EInputEvent::IE_Pressed, this, &ASlashCharacter::EKeyPressed);
 	PlayerInputComponent->BindAction(FName("Attack"), EInputEvent::IE_Pressed, this, &ASlashCharacter::RKeyPressed);
+}
+
+float ASlashCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::reduceHealth(DamageAmount);
+	if (shov && _Attributes)
+		shov->SetHealthBarPercent(_Attributes->getHealthPercent());
+	return DamageAmount;
 }

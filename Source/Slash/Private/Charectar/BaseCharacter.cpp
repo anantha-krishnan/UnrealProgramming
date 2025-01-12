@@ -141,6 +141,14 @@ void ABaseCharacter::SpawnHitParticles(const FVector& hitloc)
 
 }
 
+void ABaseCharacter::reduceHealth(float danage)
+{
+	if (_Attributes)
+	{
+		_Attributes->reduceCurrHealth(danage);
+	}
+}
+
 // Called every frame
 void ABaseCharacter::Tick(float DeltaTime)
 {

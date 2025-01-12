@@ -14,6 +14,7 @@ class Aitem;
 class UAnimInstance;
 class UAnimMontage;
 class AWeapon;
+class USlashOverlay;
 
 UCLASS()
 class SLASH_API ASlashCharacter : public ABaseCharacter
@@ -29,10 +30,13 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void InitialiseSlashOverlay();
 
 	void MoveForward(float value);
 	void MoveRight(float value);
@@ -80,6 +84,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Montage")
 	UAnimMontage* _SlashDisarmMontage;
 
+	UPROPERTY()
+	USlashOverlay* shov;
 
 public:
 	FORCEINLINE void SetOverlappingItem(Aitem* item) { _OverlappingItem = item; }

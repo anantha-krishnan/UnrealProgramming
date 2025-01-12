@@ -70,6 +70,7 @@ protected:
 
 	virtual void PlayHitSound(const FVector& hitloc);
 	virtual void SpawnHitParticles(const FVector& hitloc);
+	void reduceHealth(float danage);
 
 public:
 	// Called every frame

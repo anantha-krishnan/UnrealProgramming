@@ -280,12 +280,9 @@ bool AEnemy::CanChase()
 
 void AEnemy::reduceHealth(float danage)
 {
-	if (_Attributes)
-	{
-		_Attributes->reduceCurrHealth(danage);
-		updateHealthWidget(_Attributes->getHealthPercent());
-	}
-	
+	Super::reduceHealth(danage);
+	updateHealthWidget(_Attributes->getHealthPercent());
+
 }
 void AEnemy::updateHealthWidget(float per)
 {
